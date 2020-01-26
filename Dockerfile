@@ -12,7 +12,7 @@ COPY scripts /scripts
 COPY qemu /qemu
 
 RUN cd s2e-build && \
-    make -f /scripts/Makefile S2E_PREFIX=/opt/s2e QEMU_SRC=/qemu stamps/qemu-release-install
+    make -f /scripts/Makefile BUILD_ARCH=x86_64 S2E_PREFIX=/opt/s2e QEMU_SRC=/qemu stamps/qemu-release-install
 
 # Install s2e-env
 COPY s2e-env s2e/s2e-env
