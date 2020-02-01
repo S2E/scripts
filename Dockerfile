@@ -16,6 +16,6 @@ RUN cd s2e-build && \
 
 # Install s2e-env
 COPY s2e-env s2e/s2e-env
-RUN apt-get -y install python-pip && \
+RUN apt-get -y install python3-pip && \
     cd s2e/s2e-env && \
-    pip install --process-dependency-links .
+    pip3 install --process-dependency-links .
