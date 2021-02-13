@@ -20,11 +20,11 @@
 # SOFTWARE.
 
 FROM ubuntu:18.04
-MAINTAINER Vitaly Chipounov <vitaly@cyberhaven.io>
+MAINTAINER Vitaly Chipounov <vitaly@cyberhaven.com>
 
-RUN sed -i '1ideb mirror://mirrors.ubuntu.com/mirrors.txt xenial main restricted' /etc/apt/sources.list && \
-    sed -i '1ideb mirror://mirrors.ubuntu.com/mirrors.txt xenial-updates main restricted' /etc/apt/sources.list && \
-    sed -i '1ideb mirror://mirrors.ubuntu.com/mirrors.txt xenial-security main restricted' /etc/apt/sources.list
+RUN sed -i '1ideb mirror://mirrors.ubuntu.com/mirrors.txt bionic main restricted' /etc/apt/sources.list && \
+    sed -i '1ideb mirror://mirrors.ubuntu.com/mirrors.txt bionic-updates main restricted' /etc/apt/sources.list && \
+    sed -i '1ideb mirror://mirrors.ubuntu.com/mirrors.txt bionic-security main restricted' /etc/apt/sources.list
 
 # Update must come first or they may be random package installation failures
 RUN apt-get update
@@ -51,16 +51,19 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
         lsof psmisc libboost-system1.65.1 libboost-serialization1.65.1 libboost-regex1.65.1 \
         libmemcached11 libgettextpo0 libelf1 libelf1:i386 libjemalloc1       \
         libpcre3 libpcre3-dev libpcre3:i386                                  \
-        liblua5.1-0 liblua5.2-0 libsigc++-2.0-dev jq libpng12-0
+        liblua5.1-0 liblua5.2-0 libsigc++-2.0-dev jq libpng16-16
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         libc6-dev-i386 lib32stdc++-4.8-dev time                               \
         libpython2.7:i386 lib32ncurses5 lib32ncurses5-dev                     \
         libncurses5-dev libx32ncurses5-dev libncurses5-dev:i386
 
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
 # Copy pre-compiled S2E files
 COPY s2e /opt/s2e
 
 # Install s2e-env
 COPY s2e-env /s2e-env
-RUN cd /s2e-env && pip3 install --process-dependency-links .
+
+RUN cd /s2e-env && pip3 install .

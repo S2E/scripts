@@ -32,6 +32,7 @@ RUN cd s2e-build && \
 
 # Install s2e-env
 COPY s2e-env s2e/s2e-env
-RUN apt-get -y install python3-pip && \
-    cd s2e/s2e-env && \
-    pip3 install --process-dependency-links .
+RUN apt-get -y install python3-pip
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+RUN cd s2e/s2e-env && pip3 install .
