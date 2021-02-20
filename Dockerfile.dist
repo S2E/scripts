@@ -58,6 +58,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         libpython2.7:i386 lib32ncurses5 lib32ncurses5-dev                     \
         libncurses5-dev libx32ncurses5-dev libncurses5-dev:i386
 
+# Required for C++17
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y gcc-9 g++-9
+
 RUN python3 -m pip install --upgrade pip setuptools wheel
 
 # Copy pre-compiled S2E files
