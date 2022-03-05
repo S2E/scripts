@@ -27,3 +27,16 @@ BUILD_SCRIPTS_SRC=$(REPO_DIR)/s2e/scripts
 
 include $(REPO_DIR)/s2e/Makefile
 include $(REPO_DIR)/scripts/Makefile.qemu
+
+# From https://stackoverflow.com/questions/4219255/how-do-you-get-the-list-of-targets-in-a-makefile
+# Note that we have to list the targets from this makefile. Calling the list target inside
+# $(REPO_DIR)/s2e/Makefile will return a partial list only for some reason.
+list-s2e-targets:
+	@$(MAKE) -pRrq -f $(REPO_DIR)/s2e/Makefile : 2>/dev/null |                                  \
+		awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | \
+		sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
+
+list-qemu-targets:
+	@$(MAKE) -pRrq -f $(REPO_DIR)/scripts/Makefile.qemu : 2>/dev/null |                                  \
+		awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | \
+		sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
