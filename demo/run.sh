@@ -70,6 +70,10 @@ useradd -u $MUID -g s2e s2e
 # S2E shared libraries are installed in a non-standard location,
 # make sure the system can find them.
 echo /opt/s2e/lib > /etc/ld.so.conf.d/s2e.conf
+# if we are using a binary LLVM distribution, this is needed
+# to find LLVM libraries
+echo /usr/lib/llvm-13/lib >> /etc/ld.so.conf.d/s2e.conf
+
 ldconfig
 
 ROOT="$(pwd)/s2e-demo"
