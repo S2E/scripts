@@ -63,6 +63,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y gcc-9 g++-9
 
+# Specify that we will use binary LLVM-13 packages
+ENV SYSTEM_LLVM=13
+#Install binary LLVM only if SYTEM_LLVM is not "no"
+RUN if [ "${SYSTEM_LLVM}" != "no" ]; then wget https://apt.llvm.org/llvm.sh && \
+    chmod +x ./llvm.sh && \
+    DEBIAN_FRONTEND=noninteractive ./llvm.sh ${SYSTEM_LLVM} && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq libmlir-${SYSTEM_LLVM}-dev; fi
+
 RUN python3 -m pip install --upgrade pip setuptools wheel
 
 # Copy pre-compiled S2E files
