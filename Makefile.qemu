@@ -44,6 +44,9 @@ QEMU_CONFIGURE_FLAGS = --prefix=$(S2E_PREFIX)        \
                        --disable-libiscsi            \
                        --disable-docs                \
                        --disable-spice               \
+                       --disable-nettle              \
+                       --disable-curl                \
+                       --disable-opengl              \
                        $(EXTRA_QEMU_FLAGS)
 
 QEMU_DEBUG_FLAGS = --enable-debug
