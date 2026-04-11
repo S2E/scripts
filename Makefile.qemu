@@ -36,17 +36,8 @@ QEMU_TARGETS=i386-softmmu,x86_64-softmmu
 
 QEMU_CONFIGURE_FLAGS = --prefix=$(S2E_PREFIX)        \
                        --target-list=$(QEMU_TARGETS) \
-                       --disable-smartcard           \
-                       --disable-virtfs              \
-                       --disable-xen                 \
-                       --disable-bluez               \
-                       --disable-vde                 \
-                       --disable-libiscsi            \
-                       --disable-docs                \
-                       --disable-spice               \
-                       --disable-nettle              \
-                       --disable-curl                \
-                       --disable-opengl              \
+                       --enable-slirp \
+                       --disable-docs \
                        $(EXTRA_QEMU_FLAGS)
 
 QEMU_DEBUG_FLAGS = --enable-debug
