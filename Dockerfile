@@ -27,8 +27,9 @@ COPY .repo /.repo
 COPY scripts /scripts
 COPY qemu /qemu
 
-RUN apt-get install -y python-is-python3
+RUN apt-get install -y python3-tomli ninja-build libslirp-dev
 
+ARG SYSTEM_CLANG_VERSION=15
 RUN cd s2e-build && \
     make -f /scripts/Makefile BUILD_ARCH=x86_64 S2E_PREFIX=/opt/s2e QEMU_SRC=/qemu stamps/qemu-release-install
 
