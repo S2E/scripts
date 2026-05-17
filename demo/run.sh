@@ -78,6 +78,13 @@ ROOT="$(pwd)/s2e-demo"
 # new files will be owned by root.
 exec sudo -u s2e /bin/bash - << EOF
 
+CURDIR="$(pwd)"
+
+cd /s2e-env
+. .venv/bin/activate
+
+cd "$CURDIR"
+
 if [ ! -d "$ROOT" ]; then
   s2e init -b /opt/s2e "$ROOT"
 fi
