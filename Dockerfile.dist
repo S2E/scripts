@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM ubuntu:24.04
+FROM docker.io/library/ubuntu:24.04
 
 # Update must come first or they may be random package installation failures
 RUN apt-get update

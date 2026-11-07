@@ -21,7 +21,7 @@
 
 # Installs S2E and its associated libraries and tools to /opt/s2e
 
-FROM cyberhaven/libs2e-build
+FROM docker.io/cyberhaven/libs2e-build
 
 COPY .repo /.repo
 COPY scripts /scripts

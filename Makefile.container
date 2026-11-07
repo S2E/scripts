@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Creates a docker image containing a ready-to-run S2E demo.
+# Creates a container image containing a ready-to-run S2E demo.
 all: demo
 demo: stamps/decree-demo
 
@@ -34,49 +34,51 @@ REPO_ROOT=$(BUILD_SCRIPTS_DIR)/../
 LIBS2E_SRC?=$(REPO_ROOT)/s2e
 S2E_BUILD:=$(CURDIR)
 
-DOCKER_PREFIX=cyberhaven
+# Fully qualified, so that podman push sends the images to Docker Hub and the
+# FROM lines that refer to them resolve without a registry search.
+IMAGE_PREFIX=docker.io/cyberhaven
 
-##########
-# Docker #
-##########
+##############
+# Containers #
+##############
 
 stamps:
 	mkdir -p $@
 
-# Build S2E inside a docker container
-stamps/docker-libs2e-build: | stamps
-	echo Building libs2e inside docker container...
-	cd $(LIBS2E_SRC) && docker build -t $(DOCKER_PREFIX)/libs2e-build -f Dockerfile .
+# Build S2E inside a container
+stamps/container-libs2e-build: | stamps
+	echo Building libs2e inside a container...
+	cd $(LIBS2E_SRC) && podman build -t $(IMAGE_PREFIX)/libs2e-build -f Dockerfile .
 	touch $@
 
-stamps/docker-s2e-build: stamps/docker-libs2e-build
-	echo Building S2E inside docker container...
-	cd $(REPO_ROOT) && docker build -t $(DOCKER_PREFIX)/s2e-build -f scripts/Dockerfile .
+stamps/container-s2e-build: stamps/container-libs2e-build
+	echo Building S2E inside a container...
+	cd $(REPO_ROOT) && podman build -t $(IMAGE_PREFIX)/s2e-build -f scripts/Dockerfile .
 	touch $@
 
-$(S2E_BUILD)/docker $(S2E_BUILD)/docker-demo:
+$(S2E_BUILD)/container $(S2E_BUILD)/container-demo:
 	mkdir -p "$@"
 
 # This rule creates a container that only has S2E binaries in it.
 # Note: it is not possible to simply delete build files from the s2e-build
-# container, because docker would still keep intermediate layers.
+# container, because podman would still keep intermediate layers.
 # That would make the cyberhaven/s2e container unnecessarily large.
-stamps/docker-s2e: stamps/docker-s2e-build $(S2E_BUILD)/docker $(BUILD_SCRIPTS_DIR)/Dockerfile.dist
-	echo Preparing docker build folder...
-	cp $(BUILD_SCRIPTS_DIR)/Dockerfile.dist $(S2E_BUILD)/docker
-	rsync -av --delete --exclude=venv --exclude=.git $(REPO_ROOT)/s2e-env $(S2E_BUILD)/docker/
+stamps/container-s2e: stamps/container-s2e-build $(S2E_BUILD)/container $(BUILD_SCRIPTS_DIR)/Dockerfile.dist
+	echo Preparing container build folder...
+	cp $(BUILD_SCRIPTS_DIR)/Dockerfile.dist $(S2E_BUILD)/container
+	rsync -av --delete --exclude=venv --exclude=.git $(REPO_ROOT)/s2e-env $(S2E_BUILD)/container/
 
 	echo Extracting /opt/s2e from build image
-	cd $(S2E_BUILD)/docker && $(BUILD_SCRIPTS_DIR)/extract-docker-dir.sh $(DOCKER_PREFIX)/s2e-build /opt/s2e .
+	cd $(S2E_BUILD)/container && $(BUILD_SCRIPTS_DIR)/extract-container-dir.sh $(IMAGE_PREFIX)/s2e-build /opt/s2e .
 
-	echo Building $(DOCKER_PREFIX)/s2e
-	cd $(S2E_BUILD)/docker &&  docker build --force-rm=true -t $(DOCKER_PREFIX)/s2e -f Dockerfile.dist .
+	echo Building $(IMAGE_PREFIX)/s2e
+	cd $(S2E_BUILD)/container &&  podman build --force-rm=true -t $(IMAGE_PREFIX)/s2e -f Dockerfile.dist .
 
 	touch $@
 
-stamps/decree-demo: $(S2E_BUILD)/docker-demo stamps/docker-s2e
+stamps/decree-demo: $(S2E_BUILD)/container-demo stamps/container-s2e
 	echo Building demo...
-	cp -r $(BUILD_SCRIPTS_DIR)/demo/* $(S2E_BUILD)/docker-demo
-	cp $(REPO_ROOT)/decree/samples/* $(S2E_BUILD)/docker-demo
-	cd $(S2E_BUILD)/docker-demo && docker build -t $(DOCKER_PREFIX)/s2e-demo -f Dockerfile.demo .
+	cp -r $(BUILD_SCRIPTS_DIR)/demo/* $(S2E_BUILD)/container-demo
+	cp $(REPO_ROOT)/decree/samples/* $(S2E_BUILD)/container-demo
+	cd $(S2E_BUILD)/container-demo && podman build -t $(IMAGE_PREFIX)/s2e-demo -f Dockerfile.demo .
 	touch $@

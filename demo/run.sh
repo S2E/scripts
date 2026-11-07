@@ -21,26 +21,25 @@
 # SOFTWARE.
 
 #
-# Usage: ./run.sh UID GID path_to_binary [binary args...]
+# Usage: ./run.sh path_to_binary [binary args...]
+#
+# The script runs as container root, which rootless Podman maps to the calling
+# user, so the S2E environment that it creates belongs to that user.
 #
 
-if [ $# -lt 3 ]; then
-    echo "Usage: $0 uid gid path_to_binary [binary args...]"
+set -e
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 path_to_binary [binary args...]"
     exit 1
 fi
-
-MUID="$1"
-shift
-
-MGID="$1"
-shift
 
 BINARY_PATH="$1"
 shift
 
 if [ ! -f "$BINARY_PATH" ]; then
   echo "$BINARY_PATH was not found. This path must exist inside the container."
-  echo "If the binary is on your host machine, make sure that you mounted the host folder properly (-v docker option)."
+  echo "If the binary is on your host machine, make sure that you mounted the host folder properly (-v podman option)."
   exit 1
 fi
 
@@ -50,34 +49,12 @@ BINARY="$(basename "$BINARY_PATH")"
 # Project name doesn't have the extension
 PROJECT="$(echo $BINARY | cut -f 1 -d '.')"
 
-# Verify that the specified group and user ids don't exist locally.
-# If so, delete them. This may happen if the host OS is not Debian-based,
-# where user ids may conflict with those preinstalled in the docker image.
-GROUP=$(getent group $MGID | cut -d ':' -f 1)
-USER=$(getent passwd $MUID | cut -d ':' -f 1)
-
-if [ "x$USER" != "x" ]; then
-  userdel $USER
-fi
-
-if [ "x$GROUP" != "x" ]; then
-  groupdel $GROUP
-fi
-
-groupadd -g $MGID s2e
-useradd -u $MUID -g s2e s2e
-
 # S2E shared libraries are installed in a non-standard location,
 # make sure the system can find them.
 echo /opt/s2e/lib > /etc/ld.so.conf.d/s2e.conf
 ldconfig
 
 ROOT="$(pwd)/s2e-demo"
-
-# Run the rest of the script with the uid/gid provided, otherwise
-# new files will be owned by root.
-exec sudo -u s2e /bin/bash - << EOF
-
 CURDIR="$(pwd)"
 
 cd /s2e-env
@@ -95,10 +72,8 @@ if [ ! -d "projects/$PROJECT" ]; then
   echo "Creating new project in projects/$PROJECT"
 
   # Automatically download image if needed
-  s2e new_project -n "$PROJECT" -d "$BINARY_PATH" $*
+  s2e new_project -n "$PROJECT" -d "$BINARY_PATH" "$@"
 fi
 
 echo Running $PROJECT
 s2e run "$PROJECT"
-
-EOF
