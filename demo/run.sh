@@ -27,6 +27,8 @@
 # user, so the S2E environment that it creates belongs to that user.
 #
 
+set -e
+
 if [ $# -lt 1 ]; then
     echo "Usage: $0 path_to_binary [binary args...]"
     exit 1
