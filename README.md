@@ -1,7 +1,7 @@
 S2E Build Scripts
 =================
 
-This repository contains scripts to build S2E and package it in docker images.
+This repository contains scripts to build S2E and package it in container images.
 
 You should use this repository in conjunction with ```repo```:
 

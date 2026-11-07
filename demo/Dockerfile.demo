@@ -1,4 +1,4 @@
-FROM cyberhaven/s2e
+FROM docker.io/cyberhaven/s2e
 
 RUN mkdir /demo
 COPY run.sh /demo/

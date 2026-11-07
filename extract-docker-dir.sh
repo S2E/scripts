@@ -24,15 +24,16 @@
 set -e
 
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <docker_image> <docker_dir> <output_dir>"
+    echo "Usage: $0 <image> <image_dir> <output_dir>"
     exit 1
 fi
 
-docker_image=$1
-docker_dir=$2
+image=$1
+image_dir=$2
 output_dir=$(mkdir -p $3 && cd $3 && pwd)
 
-docker_container=`docker run -d "$docker_image" sleep 1000`
-docker cp "${docker_container}:$docker_dir" "$output_dir" || true
-docker kill "$docker_container" >/dev/null || true
-docker rm "$docker_container" >/dev/null
+# A created container can be copied from without starting it. The command is
+# only there so that podman create does not require the image to define a CMD.
+container=$(podman create "$image" true)
+podman cp "${container}:$image_dir" "$output_dir"
+podman rm "$container" >/dev/null
